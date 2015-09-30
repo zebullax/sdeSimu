@@ -32,19 +32,22 @@ def outputSimuToPlot(simuParams, simuResult) :
     nbSteps = int(T/dt + 1) # + 1 for x0
     tScale  = numpy.linspace(0, T, nbSteps)
     xScale  = numpy.asarray(simuResult)
+    
     plt.plot(tScale, xScale)
+    plt.xlabel("time(y)")
+    plt.ylabel("S(t)")
     plt.show()
      
 def main() :
     argparser = argparse.ArgumentParser(prog = "Monte Carlo simulation of GBM", add_help = True)
     argparser.add_argument("--s", "--std", type=float, default=0.2,\
-        help="Standard deviation coefficient for the dWt term")
+        help="Annual standard deviation (coefficient for the dWt term)")
     argparser.add_argument("--m", "--mean", type=float, default=0.0,\
-        help="Mean coefficient for the dt term")
+        help="Annual mean (coefficient for the dt term)")
     argparser.add_argument("--i", "--init", type=float, default=100.0,\
-        help="Initial value for the SP")
+        help="Initial value for the process")
     argparser.add_argument("--T", "--maturity", type=float, default=1.0,\
-        help="Upper time value for the simulation")
+        help="Upper time value (unit year) for the simulation")
     argparser.add_argument("--dt", "--timestep", type=float, default=0.01,\
         help="Timestep value used for time discretization")
     argparser.add_argument("--o", "--outFile", type=str, \
