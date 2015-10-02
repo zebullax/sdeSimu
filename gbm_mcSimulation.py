@@ -13,13 +13,17 @@ def simuGBM(simuParams) :
     dt      = simuParams["dt"]    
     sigma   = simuParams["s"]
     mu      = simuParams["m"] - (sigma**2)/2
-
-    simuVal = [s0]
+    nbPaths = simuParams["N"]
     nbSteps = int(T/dt)
-    for i in range(nbSteps) : 
-        lastVal = simuVal[len(simuVal)-1]
-        simuVal.append(lastVal * math.exp(mu*dt + sigma*math.sqrt(dt)*random.normalvariate(0,sigma)))
-    return simuVal
+    results = []
+    
+    for j in range(nbPaths) :
+        simuVal = [s0]
+        for i in range(nbSteps) : 
+            lastVal = simuVal[len(simuVal)-1]
+            simuVal.append(lastVal * math.exp(mu*dt + sigma*math.sqrt(dt)*random.normalvariate(0,sigma)))
+        results.append(simuVal[:])
+    return results
 
 # Simulate jump times for poisson process
 # with intensity l
@@ -47,9 +51,10 @@ def outputSimuGbmToPlot(simuParams, simuResult) :
     dt      = simuParams["dt"]    
     nbSteps = int(T/dt + 1) # + 1 for x0
     tScale  = numpy.linspace(0, T, nbSteps)
-    xScale  = numpy.asarray(simuResult)
-    
-    plt.plot(tScale, xScale)
+
+    for path in simuResult :
+        xScale  = numpy.asarray(path)   
+        plt.plot(tScale, xScale)
     plt.xlabel("time(y)")
     plt.ylabel("S(t)")
     plt.show()
@@ -67,21 +72,24 @@ def outputSimuPoissonToPlot(simuParams, simuResult) :
 
 def main() :
     argparser = argparse.ArgumentParser(prog = "Monte Carlo simulation of GBM", add_help = True)
+    #Common params
+    argparser.add_argument("--T", "--maturity", type=float, default=1.0,\
+        help="End time (unit year) for the simulation")
+    argparser.add_argument("--N", "--nbPaths", type=int, default=100,\
+        help="Number of paths to simulate")
     #GBM Params
-    argparser.add_argument("--gbm", type=bool, default=False,\
+    argparser.add_argument("--gbm", type=bool, default=True,\
         help="Simulate geometric Brownian motion")    
     argparser.add_argument("--s", "--std", type=float, default=0.2,\
         help="Annual standard deviation (coefficient for the dWt term)")
     argparser.add_argument("--m", "--mean", type=float, default=0.0,\
         help="Annual mean (coefficient for the dt term)")
     argparser.add_argument("--i", "--init", type=float, default=100.0,\
-        help="Initial value for the process")
-    argparser.add_argument("--T", "--maturity", type=float, default=1.0,\
-        help="End time (unit year) for the simulation")
+        help="Initial value for the process")    
     argparser.add_argument("--dt", "--timestep", type=float, default=0.01,\
         help="Timestep used for time discretization")
     #Poisson Params
-    argparser.add_argument("--poisson", type=bool, default=True,\
+    argparser.add_argument("--poisson", type=bool, default=False,\
         help="Simulate Poisson process")
     argparser.add_argument("--l", "--lambda", type=float, default=10.0,\
         help="Jump intensity for Poisson process")
